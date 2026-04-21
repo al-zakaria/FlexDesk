@@ -2,6 +2,7 @@
   <Folder Name="/src/" />
   <Folder Name="/src/aspire/">
     <Project Path="src/aspire/FlexDesk.AppHost/FlexDesk.AppHost.csproj" />
+    <Project Path="src/aspire/FlexDesk.ServiceDefaults/FlexDesk.ServiceDefaults.csproj" />
   </Folder>
   <Folder Name="/src/microservices/" />
 </Solution>
