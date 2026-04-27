@@ -4,5 +4,8 @@
     <Project Path="src/aspire/FlexDesk.AppHost/FlexDesk.AppHost.csproj" />
     <Project Path="src/aspire/FlexDesk.ServiceDefaults/FlexDesk.ServiceDefaults.csproj" />
   </Folder>
-  <Folder Name="/src/microservices/" />
+  <Folder Name="/src/backend/" />
+  <Folder Name="/src/identity/">
+    <Project Path="src/identity/FlexDesk.IdentityServer/FlexDesk.IdentityServer.csproj" />
+  </Folder>
 </Solution>
