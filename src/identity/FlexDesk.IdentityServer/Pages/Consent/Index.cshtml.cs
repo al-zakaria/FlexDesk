@@ -50,7 +50,7 @@ public class Index : PageModel
     public async Task<IActionResult> OnPost()
     {
         // validate return url is still valid
-        var request = await _interaction.GetAuthorizationContextAsync(Input.ReturnUrl);
+        var request = await _interaction.GetAuthorizationContextAsync(Input.ReturnUrl, HttpContext.RequestAborted);
         if (request == null)
         {
             return RedirectToPage("/Home/Error/Index");
@@ -65,7 +65,7 @@ public class Index : PageModel
 
             // emit event
             await _events.RaiseAsync(new ConsentDeniedEvent(User.GetSubjectId(), request.Client.ClientId,
-                request.ValidatedResources.RawScopeValues));
+                request.ValidatedResources.RawScopeValues), HttpContext.RequestAborted);
             Telemetry.Metrics.ConsentDenied(request.Client.ClientId,
                 request.ValidatedResources.ParsedScopes.Select(s => s.ParsedName));
         }
@@ -92,7 +92,7 @@ public class Index : PageModel
                 // emit event
                 await _events.RaiseAsync(new ConsentGrantedEvent(User.GetSubjectId(), request.Client.ClientId,
                     request.ValidatedResources.RawScopeValues, grantedConsent.ScopesValuesConsented,
-                    grantedConsent.RememberConsent));
+                    grantedConsent.RememberConsent), HttpContext.RequestAborted);
                 Telemetry.Metrics.ConsentGranted(request.Client.ClientId, grantedConsent.ScopesValuesConsented,
                     grantedConsent.RememberConsent);
                 var denied = request.ValidatedResources.ParsedScopes.Select(s => s.ParsedName)
@@ -114,7 +114,7 @@ public class Index : PageModel
             ArgumentNullException.ThrowIfNull(Input.ReturnUrl, nameof(Input.ReturnUrl));
 
             // communicate outcome of consent back to identityserver
-            await _interaction.GrantConsentAsync(request, grantedConsent);
+            await _interaction.GrantConsentAsync(request, grantedConsent, HttpContext.RequestAborted);
 
             // redirect back to authorization endpoint
             if (request.IsNativeClient() == true)
@@ -140,7 +140,7 @@ public class Index : PageModel
     {
         ArgumentNullException.ThrowIfNull(returnUrl);
 
-        var request = await _interaction.GetAuthorizationContextAsync(returnUrl);
+        var request = await _interaction.GetAuthorizationContextAsync(returnUrl, HttpContext.RequestAborted);
         if (request != null)
         {
             View = CreateConsentViewModel(request);
