@@ -5,4 +5,4 @@ using Microsoft.EntityFrameworkCore;
 namespace FlexDesk.IdentityServer.Data;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-    : IdentityDbContext<ApplicationUser>(options);
+    : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>(options);
