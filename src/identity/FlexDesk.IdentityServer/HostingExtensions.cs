@@ -51,9 +51,11 @@ internal static class HostingExtensions
     public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
     {
         builder.Services.AddRazorPages();
-
+        
+        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+        
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+            options.UseNpgsql(connectionString));
 
         builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -73,9 +75,22 @@ internal static class HostingExtensions
                     options.Diagnostics.ChunkSize = 1024 * 1024 * 10; // 10 MB
                 }
             })
-            .AddInMemoryIdentityResources(Config.IdentityResources)
-            .AddInMemoryApiScopes(Config.ApiScopes)
-            .AddInMemoryClients(Config.Clients)
+            .AddConfigurationStore(options =>
+            {
+                options.ConfigureDbContext = b =>
+                    b.UseNpgsql(connectionString, 
+                        sql => sql.MigrationsAssembly(typeof(HostingExtensions).Assembly.GetName().Name));
+            })
+            .AddOperationalStore(options =>
+            {
+                options.ConfigureDbContext = b =>
+                    b.UseNpgsql(connectionString,
+                        sql => sql.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.GetName().Name));
+                
+                options.EnableTokenCleanup = true;
+                options.TokenCleanupInterval = 3600;
+                options.TokenCleanupBatchSize = 100;
+            })
             .AddAspNetIdentity<ApplicationUser>()
             .AddLicenseSummary();
 
@@ -97,7 +112,7 @@ internal static class HostingExtensions
                     RoleClaimType = "role"
                 };
             });
-
+        
         return builder.Build();
     }
 
