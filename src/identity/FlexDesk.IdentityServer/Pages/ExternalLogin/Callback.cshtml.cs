@@ -99,7 +99,7 @@ public class Callback : PageModel
 
         // check if external login is in the context of an OIDC request
         var context = await _interaction.GetAuthorizationContextAsync(returnUrl, HttpContext.RequestAborted);
-        await _events.RaiseAsync(new UserLoginSuccessEvent(provider, providerUserId, user.Id, user.UserName, true,
+        await _events.RaiseAsync(new UserLoginSuccessEvent(provider, providerUserId, user.Id.ToString(), user.UserName, true,
             context?.Client.ClientId), HttpContext.RequestAborted);
         Telemetry.Metrics.UserLogin(context?.Client.ClientId, provider!);
 
@@ -121,12 +121,12 @@ public class Callback : PageModel
     private async Task<ApplicationUser> AutoProvisionUserAsync(string provider, string providerUserId,
         IEnumerable<Claim> claims)
     {
-        var sub = Guid.NewGuid().ToString();
+        var subGuid = Guid.NewGuid();
 
         var user = new ApplicationUser
         {
-            Id = sub,
-            UserName = sub, // don't need a username, since the user will be using an external provider to login
+            Id = subGuid,
+            UserName = subGuid.ToString(), // don't need a username, since the user will be using an external provider to login
         };
 
         // email
